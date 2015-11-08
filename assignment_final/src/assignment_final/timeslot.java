@@ -14,13 +14,13 @@ public class timeslot implements Serializable {
 		this.m = m;
 		movieType = movieformat;
 		this.t = t;
-		if (t.getTheatreType() == "regular") {
+		if (t.getTheatreType().compareTo("regular")==0){
 			seat = new char[5][10];
-			for (int i = 0; i < 5; i++)
+			for (int i = 0; i < 5; i++){
 				for (int j = 0; j < 10; j++) {
 					seat[i][j] = 'O';
-				}
-		} else if (t.getTheatreType() == "gold") {
+				}}
+		} else if (t.getTheatreType().compareTo("gold")==0) {
 			seat = new char[5][6];
 			for (int i = 0; i < 5; i++)
 				for (int j = 0; j < 6; j++) {

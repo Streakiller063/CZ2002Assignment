@@ -19,7 +19,46 @@ public class Movie implements Serializable{
 	private Date startPeriod;
 	private Date endPeriod;
 	private int totalTicketSales;
+	private ArrayList<Review> array_review = new ArrayList<Review>();
 	static Scanner sc = new Scanner(System.in);
+	
+	public void addReview(){
+		String review;
+		int rating;
+		System.out.println("Please type in your review about this movie(Do not press enter until finish)");
+		review = sc.nextLine();
+		System.out.println("Please rate this movie(1-5)");
+		rating = sc.nextInt();
+		sc.nextLine();
+		Review rev = new Review(review,rating);
+		array_review.add(rev);
+		System.out.println("Thank you. Your review has been submitted");
+	}
+	
+	//find overallRating
+	public double getOverallRating(){
+		double total = 0;
+	
+		for(int i = 0; i<array_review.size();i++)
+		{
+			total+=array_review.get(i).getRating();
+		}
+		return total/(array_review.size());
+	}
+	public void printReview()
+	{
+		int size = 0;
+		if(array_review.size()<5){
+			size = array_review.size();
+		}
+		else
+			size = 5;
+		System.out.println("Here are the some reviews: ");
+		for(int i = 0; i<size;i++)
+		{
+			System.out.println((i+1)+". "+array_review.get(i).getReview());
+		}
+	}
 	
 	public void setNewMovie() {
 		this.setTitle();

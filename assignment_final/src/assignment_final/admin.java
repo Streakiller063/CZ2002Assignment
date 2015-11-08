@@ -8,8 +8,6 @@ import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import serializeHandler.SerializeHandler;
-
 public class admin {
 	Scanner sc = new Scanner(System.in);
 	public ArrayList<LoginItem> array_login = new ArrayList<LoginItem>();
@@ -37,83 +35,127 @@ public class admin {
 		login();
 		printMenu();
 		int option;
-		do{
+		do {
 			option = sc.nextInt();
 			sc.nextLine();
 			System.out.println();
 			switch (option) {
-				case 1:
-					addMovieEntry();
-					break;
-				case 2: 
-					updateMovieListing();
-					break;
-				case 3:
-					deleteMovieEntry();
-					break;
-				case 4:
-					createMovieShowTimes();
-					break;
-				case 5:
-					break;
-				case 6:
-					removeMovieShowTime();
-					break;
-				case 7:
-					createId();
-					break;
-				case 8:
-					deleteId();
-					break;
-				case 9:
-					return;
-				default: 
-					System.out.println("Invalid Input! Try again!");
-					break;
+			case 1: {
+				addMovieEntry();
+				break;
 			}
-			
-			//should it be here? not outside loop?
-			SerializeHandler.saveArray(array_Schedule,"scheduleDatabse.txt");
-			SerializeHandler.saveArray(array_movie,"movieDatabse.txt");
-			
+			case 2: {
+				updateMovieListing();
+				break;
+			}
+			case 3: {
+				deleteMovieEntry();
+				break;
+			}
+			case 4: {
+				createMovieShowTimes();
+				break;
+			}
+			case 5:
+				break;
+			case 6: {
+				removeMovieShowTime();
+				break;
+			}
+
+			case 8: {
+				deleteId();
+				break;
+			}
+			case 7: {
+				createId();
+				break;
+			}
+			case 9: {
+				return;
+			}
+			default:
+				System.out.println("Input Error! Try again!");
+			}
+
+			try {
+				FileOutputStream fos = new FileOutputStream("scheduleDatabase.txt");
+				ObjectOutputStream out = new ObjectOutputStream(fos);
+				out.writeObject(array_Schedule);
+				out.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+			try {
+				FileOutputStream fos = new FileOutputStream("movieDatabase.txt");
+				ObjectOutputStream out = new ObjectOutputStream(fos);
+				out.writeObject(array_movie);
+				out.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
 			System.out.println();
 			printMenu();
-		}while(option != 9);
+		} while (option != 9);
 
 	}
 
-	
 	public void login() {
 		String id, password;
 		FileInputStream fis = null;
 		ObjectInputStream in = null;
-		array_login = SerializeHandler.loadArray("login.txt");
-		
-		System.out.println("Please enter your id");
-		id = sc.nextLine();
-		System.out.println("Please entert your password");
-		password = sc.nextLine();
-		System.out.println();
-		
-		boolean loginStatus = false;
-		for (int i = 0; i < array_login.size(); i++) {
-			if (array_login.get(i).getId().compareTo(id) == 0
-					&& array_login.get(i).getPassword().compareTo(password) == 0) {
-				loginStatus = true;
-				break;
-			}
+		try {
+			fis = new FileInputStream("login.txt");
+			in = new ObjectInputStream(fis);
+			array_login = (ArrayList) in.readObject();
+			in.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		} catch (ClassNotFoundException ex) {
+			ex.printStackTrace();
 		}
-		if (!loginStatus) {
-			System.out.println("Wrong id/password. Shutting down apps for security");
-			System.exit(0);
-		} else {
-			array_movie = SerializeHandler.loadArray("movieDatabase.txt");
+		try {
+			fis = new FileInputStream("movieDatabase.txt");
+			in = new ObjectInputStream(fis);
+			array_movie = (ArrayList) in.readObject();
 			ComingSoon = array_movie.get(0);
 			Preview = array_movie.get(1);
 			NowShowing = array_movie.get(2);
 			EndOfShowing = array_movie.get(3);
 
-			array_Schedule = SerializeHandler.loadArray("scheduleDatabase.txt");
+			in.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		} catch (ClassNotFoundException ex) {
+			ex.printStackTrace();
+		}
+		try {
+			fis = new FileInputStream("scheduleDatabase.txt");
+			in = new ObjectInputStream(fis);
+			array_Schedule = (ArrayList) in.readObject();
+			in.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		} catch (ClassNotFoundException ex) {
+			ex.printStackTrace();
+		}
+		System.out.println("Please enter your id");
+		id = sc.nextLine();
+		System.out.println("Please entert your password");
+		password = sc.nextLine();
+		System.out.println();
+
+		boolean LoginStatus = false;
+		for (int i = 0; i < array_login.size(); i++) {
+			if (array_login.get(i).getId().compareTo(id) == 0
+					&& array_login.get(i).getPassword().compareTo(password) == 0) {
+				LoginStatus = true;
+				break;
+			}
+		}
+		if (LoginStatus == false) {
+			System.out.println("Wrong id/password. Shutting down apps for security");
+			System.exit(0);
 		}
 	}
 
@@ -122,14 +164,22 @@ public class admin {
 		String id = sc.nextLine();
 		System.out.println("Enter new password :");
 		String password = sc.nextLine();
-		
 		LoginItem newID = new LoginItem();
 		newID.setId(id);
 		newID.setPassword(password);
 		array_login.add(newID);
-		
-		SerializeHandler.saveArray(array_login,"login.txt");
+		FileOutputStream fos = null;
+		ObjectOutputStream out = null;
+		try {
+			fos = new FileOutputStream("login.txt");
+			out = new ObjectOutputStream(fos);
+			out.writeObject(array_login);
+			out.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
 		System.out.println("Admin id created!");
+
 	}
 
 	public void deleteId() {
@@ -140,9 +190,17 @@ public class admin {
 		int choice = sc.nextInt();
 		sc.nextLine();
 		array_login.remove(choice - 1);
-		
-		SerializeHandler.saveArray(array_login,"input.txt");
 		System.out.println("This id has been removed\n");
+		FileOutputStream fos = null;
+		ObjectOutputStream out = null;
+		try {
+			fos = new FileOutputStream("login.txt");
+			out = new ObjectOutputStream(fos);
+			out.writeObject(array_login);
+			out.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	public void addMovieEntry() {
@@ -171,25 +229,29 @@ public class admin {
 		int cat = sc.nextInt();
 		System.out.println();
 		switch (cat) {
-			case 1: 
-				System.out.println("Coming soon movie:");
-				for (int i = 0; i < ComingSoon.size(); i++)
-					System.out.println((i + 1) + ". " + ComingSoon.get(i).getTitle());
-				break;
-			case 2:
-				System.out.println("Preview Movie");
-				for (int i = 0; i < Preview.size(); i++)
-					System.out.println((i + 1) + ". " + Preview.get(i).getTitle());
-				break;
-			case 3:
-				System.out.println("Now Showing Movie");
-				for (int i = 0; i < NowShowing.size(); i++)
-					System.out.println((i + 1) + ". " + NowShowing.get(i).getTitle());
-				break;
-			default:
-				break;
+		case 1: {
+			System.out.println("Coming soon movie:");
+			for (int i = 0; i < ComingSoon.size(); i++) {
+				System.out.println((i + 1) + ". " + ComingSoon.get(i).getTitle());
+			}
+			break;
 		}
-		
+		case 2: {
+			System.out.println("Preview Movie");
+			for (int i = 0; i < Preview.size(); i++) {
+				System.out.println((i + 1) + ". " + Preview.get(i).getTitle());
+			}
+			break;
+		}
+		case 3: {
+			System.out.println("Now Showing Movie");
+			for (int i = 0; i < NowShowing.size(); i++) {
+				System.out.println((i + 1) + ". " + NowShowing.get(i).getTitle());
+			}
+			break;
+		}
+		}
+
 		System.out.println("Choose the movie you want to remove : ");
 		int choice = sc.nextInt();
 		sc.nextLine();
@@ -218,9 +280,25 @@ public class admin {
 		cal.setTime(dnow);
 		cal.add(Calendar.DAY_OF_YEAR, date_selection - 1);
 		dnow = cal.getTime();
-		Schedule a = new Schedule(ft.format(dnow));
-		a.addTimeSlot();
-		array_Schedule.add(a);
+		Schedule a;
+		boolean scheduleCheck = false;
+		for(int i = 0;i<array_Schedule.size();i++)
+		{
+			if((array_Schedule.get(i).date).compareTo(ft.format(dnow))==0)
+			{
+				scheduleCheck = true;
+				a = array_Schedule.get(i);
+				a.addTimeSlot();
+				break;
+				
+			}
+		}
+		if(scheduleCheck = false)
+		{
+			a = new Schedule(ft.format(dnow));
+			a.addTimeSlot();
+			array_Schedule.add(a);
+		}
 
 	}
 
@@ -240,20 +318,20 @@ public class admin {
 			System.out.println("\nSchedule for theatre 1");
 			for (int i = 0; i < 24; i++) {
 				if (array_Schedule.get(date_sel - 1).theatre1.slot[i] != null)
-					System.out
-							.println(i + " O'clock " + array_Schedule.get(date_sel - 1).theatre1.slot[i].getMovieName());
+					System.out.println(
+							i + " O'clock " + array_Schedule.get(date_sel - 1).theatre1.slot[i].getMovieName());
 			}
 			System.out.println("Schedule for theatre 2");
 			for (int i = 0; i < 24; i++) {
 				if (array_Schedule.get(date_sel - 1).theatre2.slot[i] != null)
-					System.out
-							.println(i + " O'clock " + array_Schedule.get(date_sel - 1).theatre2.slot[i].getMovieName());
+					System.out.println(
+							i + " O'clock " + array_Schedule.get(date_sel - 1).theatre2.slot[i].getMovieName());
 			}
 			System.out.println("Schedule for theatre 3");
 			for (int i = 0; i < 24; i++) {
 				if (array_Schedule.get(date_sel - 1).theatre3.slot[i] != null)
-					System.out
-							.println(i + " O'clock " + array_Schedule.get(date_sel - 1).theatre3.slot[i].getMovieName());
+					System.out.println(
+							i + " O'clock " + array_Schedule.get(date_sel - 1).theatre3.slot[i].getMovieName());
 			}
 		}
 		if (deleteall == false) {
@@ -289,24 +367,27 @@ public class admin {
 			int cat = sc.nextInt();
 			System.out.println();
 			switch (cat) {
-			case 1:
+			case 1: {
 				System.out.println("Coming soon movie:");
 				for (int i = 0; i < ComingSoon.size(); i++) {
 					System.out.println((i + 1) + ". " + ComingSoon.get(i).getTitle());
 				}
 				break;
-			case 2:
+			}
+			case 2: {
 				System.out.println("Preview Movie");
 				for (int i = 0; i < Preview.size(); i++) {
 					System.out.println((i + 1) + ". " + Preview.get(i).getTitle());
 				}
 				break;
-			case 3:
+			}
+			case 3: {
 				System.out.println("Now Showing Movie");
 				for (int i = 0; i < NowShowing.size(); i++) {
 					System.out.println((i + 1) + ". " + NowShowing.get(i).getTitle());
 				}
 				break;
+			}
 			}
 			System.out.println("Choose the movie you want to update :");
 			int choice = sc.nextInt();
@@ -325,4 +406,5 @@ public class admin {
 		}
 		}
 	}
+
 }
